@@ -1,25 +1,24 @@
 from pptx import Presentation
-from pptx.util import Inches, Pt, Emu
+from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN
-from pptx.util import Inches, Pt
-import copy
 
-# ── Color Palette (Deep Mystical Purple/Gold) ─────────────────────────────────
-BG_DARK      = RGBColor(0x0D, 0x0D, 0x2B)   # deep navy/purple
-BG_CARD      = RGBColor(0x1A, 0x1A, 0x3E)   # slightly lighter purple
-ACCENT_GOLD  = RGBColor(0xF0, 0xC0, 0x40)   # gold
-ACCENT_PURPLE= RGBColor(0x9B, 0x59, 0xB6)   # violet
-TEXT_WHITE   = RGBColor(0xFF, 0xFF, 0xFF)
-TEXT_LIGHT   = RGBColor(0xCC, 0xCC, 0xFF)   # lavender white
-TEXT_GOLD    = RGBColor(0xF0, 0xC0, 0x40)
-DIVIDER      = RGBColor(0x9B, 0x59, 0xB6)
+# ── Color Palette (Charcoal + Gold + Teal — Professional) ─────────────────────
+BG_DARK    = RGBColor(0x14, 0x14, 0x14)   # near-black charcoal
+BG_CARD    = RGBColor(0x22, 0x22, 0x22)   # dark card
+BG_STRIPE  = RGBColor(0x1A, 0x1A, 0x1A)   # alt row
+GOLD       = RGBColor(0xD4, 0xA0, 0x17)   # rich gold
+TEAL       = RGBColor(0x1A, 0xBC, 0x9C)   # professional teal
+RED        = RGBColor(0xE7, 0x4C, 0x3C)   # problem red
+GREEN      = RGBColor(0x27, 0xAE, 0x60)   # solution green
+WHITE      = RGBColor(0xFF, 0xFF, 0xFF)
+LIGHT_GRAY = RGBColor(0xCC, 0xCC, 0xCC)
+MID_GRAY   = RGBColor(0x88, 0x88, 0x88)
 
 prs = Presentation()
 prs.slide_width  = Inches(13.33)
 prs.slide_height = Inches(7.5)
-
-BLANK = prs.slide_layouts[6]  # completely blank
+BLANK = prs.slide_layouts[6]
 
 
 def add_slide():
@@ -27,14 +26,12 @@ def add_slide():
 
 
 def bg(slide, color=BG_DARK):
-    """Fill slide background."""
     fill = slide.background.fill
     fill.solid()
     fill.fore_color.rgb = color
 
 
-def box(slide, l, t, w, h, color, alpha=None):
-    """Add a filled rectangle."""
+def box(slide, l, t, w, h, color):
     shape = slide.shapes.add_shape(1, Inches(l), Inches(t), Inches(w), Inches(h))
     shape.fill.solid()
     shape.fill.fore_color.rgb = color
@@ -43,7 +40,7 @@ def box(slide, l, t, w, h, color, alpha=None):
 
 
 def txt(slide, text, l, t, w, h,
-        size=18, bold=False, color=TEXT_WHITE,
+        size=18, bold=False, color=WHITE,
         align=PP_ALIGN.LEFT, italic=False):
     tf = slide.shapes.add_textbox(Inches(l), Inches(t), Inches(w), Inches(h))
     tf.word_wrap = True
@@ -58,19 +55,28 @@ def txt(slide, text, l, t, w, h,
     return tf
 
 
-def divider(slide, t, color=DIVIDER, thickness=0.04):
-    box(slide, 0.5, t, 12.33, thickness, color)
+def divider(slide, t):
+    box(slide, 0.5, t, 12.33, 0.04, TEAL)
 
 
-def section_tag(slide, label, l, t):
-    """Small colored pill label."""
-    box(slide, l, t, 1.8, 0.32, ACCENT_PURPLE)
-    txt(slide, label, l + 0.05, t + 0.02, 1.7, 0.3,
-        size=10, bold=True, color=TEXT_WHITE, align=PP_ALIGN.CENTER)
+def section_tag(slide, label, l=0.5, t=0.22):
+    box(slide, l, t, len(label) * 0.115 + 0.3, 0.33, TEAL)
+    txt(slide, label, l + 0.08, t + 0.04, len(label) * 0.115 + 0.15, 0.28,
+        size=11, bold=True, color=BG_DARK, align=PP_ALIGN.LEFT)
 
 
-def bullet_item(slide, text, l, t, w=10, size=16, color=TEXT_LIGHT, indent="  ▸  "):
-    txt(slide, indent + text, l, t, w, 0.4, size=size, color=color)
+def bullet(slide, text, l, t, w=11, size=17, color=LIGHT_GRAY):
+    txt(slide, "▸   " + text, l, t, w, 0.42, size=size, color=color)
+
+
+def header_bar(slide):
+    box(slide, 0, 0, 13.33, 0.1, GOLD)
+
+
+def footer_bar(slide):
+    box(slide, 0, 7.4, 13.33, 0.1, TEAL)
+    txt(slide, "Fortune Teller  ·  AI Tarot Card Recognition  ·  2026",
+        0, 7.4, 13.33, 0.1, size=9, color=MID_GRAY, align=PP_ALIGN.CENTER)
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -78,82 +84,71 @@ def bullet_item(slide, text, l, t, w=10, size=16, color=TEXT_LIGHT, indent="  �
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 s1 = add_slide()
 bg(s1)
+header_bar(s1)
+footer_bar(s1)
 
-# Decorative top bar
-box(s1, 0, 0, 13.33, 0.12, ACCENT_GOLD)
+# Left gold accent strip
+box(s1, 0, 0.1, 0.5, 7.3, GOLD)
 
-# Center glow box
-box(s1, 2.5, 1.6, 8.33, 4.3, BG_CARD)
-box(s1, 2.5, 1.6, 0.08, 4.3, ACCENT_GOLD)    # left accent bar
+# Center content area
+box(s1, 2.8, 1.8, 8.0, 3.8, BG_CARD)
+box(s1, 2.8, 1.8, 0.06, 3.8, TEAL)
 
-# Title
-txt(s1, "🔮 Fortune Teller", 2.8, 2.0, 8.0, 1.2,
-    size=48, bold=True, color=ACCENT_GOLD, align=PP_ALIGN.CENTER)
+txt(s1, "Fortune Teller", 3.0, 2.1, 7.6, 1.4,
+    size=54, bold=True, color=GOLD, align=PP_ALIGN.CENTER)
 
-# Subtitle
-txt(s1, "AI-Powered Tarot Card Recognition", 2.8, 3.1, 8.0, 0.7,
-    size=22, color=TEXT_LIGHT, align=PP_ALIGN.CENTER, italic=True)
+txt(s1, "AI-Powered Tarot Card Recognition", 3.0, 3.3, 7.6, 0.7,
+    size=24, color=WHITE, align=PP_ALIGN.CENTER, italic=True)
 
-divider(s1, 4.0, ACCENT_PURPLE, 0.03)
+box(s1, 3.5, 4.1, 6.5, 0.05, MID_GRAY)
 
-txt(s1, "EfficientNet-B0  ·  PyTorch  ·  Transfer Learning", 2.8, 4.1, 8.0, 0.5,
-    size=14, color=TEXT_GOLD, align=PP_ALIGN.CENTER)
+txt(s1, "EfficientNet-B0   ·   PyTorch   ·   Transfer Learning", 3.0, 4.25, 7.6, 0.5,
+    size=16, color=TEAL, align=PP_ALIGN.CENTER)
 
-txt(s1, "Wannakorn Sangthongngam  ·  2026", 2.8, 4.8, 8.0, 0.4,
-    size=13, color=TEXT_LIGHT, align=PP_ALIGN.CENTER)
-
-# Bottom bar
-box(s1, 0, 7.38, 13.33, 0.12, ACCENT_PURPLE)
+txt(s1, "Wannakorn Sangthongngam   ·   2026", 3.0, 4.85, 7.6, 0.45,
+    size=14, color=MID_GRAY, align=PP_ALIGN.CENTER)
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# SLIDE 2 — Project Introduction
+# SLIDE 2 — Introduction
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 s2 = add_slide()
 bg(s2)
-box(s2, 0, 0, 13.33, 0.12, ACCENT_GOLD)
-box(s2, 0, 7.38, 13.33, 0.12, ACCENT_PURPLE)
+header_bar(s2)
+footer_bar(s2)
 
-section_tag(s2, "INTRODUCTION", 0.5, 0.25)
-txt(s2, "What is Fortune Teller?", 0.5, 0.7, 10, 0.7,
-    size=32, bold=True, color=ACCENT_GOLD)
-divider(s2, 1.5)
+section_tag(s2, "INTRODUCTION")
+txt(s2, "What is Fortune Teller?", 0.5, 0.65, 12.0, 0.75,
+    size=34, bold=True, color=WHITE)
+divider(s2, 1.52)
 
-# Two column boxes
-box(s2, 0.5, 1.7, 5.7, 2.8, BG_CARD)
-box(s2, 0.5, 1.7, 0.08, 2.8, ACCENT_GOLD)
-txt(s2, "Overview", 0.75, 1.75, 5.2, 0.45, size=16, bold=True, color=ACCENT_GOLD)
-bullet_item(s2, "Take a photo of a tarot card", 0.65, 2.2)
-bullet_item(s2, "AI identifies which card it is", 0.65, 2.6)
-bullet_item(s2, "Receive your fortune reading", 0.65, 3.0)
-bullet_item(s2, "78 unique tarot cards supported", 0.65, 3.4)
+# Left box — Overview
+box(s2, 0.5, 1.7, 5.8, 3.0, BG_CARD)
+box(s2, 0.5, 1.7, 0.06, 3.0, GOLD)
+txt(s2, "Overview", 0.72, 1.78, 5.3, 0.5, size=18, bold=True, color=GOLD)
+bullet(s2, "Take a photo of a tarot card", 0.65, 2.32)
+bullet(s2, "AI identifies which card it is", 0.65, 2.75)
+bullet(s2, "Receive your fortune reading", 0.65, 3.18)
+bullet(s2, "78 unique tarot cards supported", 0.65, 3.61)
 
-box(s2, 6.8, 1.7, 5.9, 2.8, BG_CARD)
-box(s2, 6.8, 1.7, 0.08, 2.8, ACCENT_PURPLE)
-txt(s2, "Tech Stack", 7.05, 1.75, 5.4, 0.45, size=16, bold=True, color=ACCENT_PURPLE)
-bullet_item(s2, "Framework: PyTorch", 6.95, 2.2)
-bullet_item(s2, "Model: EfficientNet-B0", 6.95, 2.6)
-bullet_item(s2, "Training: Google Colab (T4 GPU)", 6.95, 3.0)
-bullet_item(s2, "Data: Custom tarot card photos", 6.95, 3.4)
+# Right box — Tech Stack
+box(s2, 6.9, 1.7, 5.9, 3.0, BG_CARD)
+box(s2, 6.9, 1.7, 0.06, 3.0, TEAL)
+txt(s2, "Tech Stack", 7.12, 1.78, 5.4, 0.5, size=18, bold=True, color=TEAL)
+bullet(s2, "Framework: PyTorch", 7.05, 2.32)
+bullet(s2, "Model: EfficientNet-B0", 7.05, 2.75)
+bullet(s2, "Training: Google Colab (T4 GPU)", 7.05, 3.18)
+bullet(s2, "Data: Custom tarot card photos", 7.05, 3.61)
 
 # Flow diagram
-box(s2, 1.0, 5.1, 2.2, 0.7, ACCENT_PURPLE)
-txt(s2, "📷 Photo", 1.0, 5.2, 2.2, 0.5, size=16, bold=True, color=TEXT_WHITE, align=PP_ALIGN.CENTER)
-
-txt(s2, "→", 3.3, 5.2, 0.6, 0.5, size=24, bold=True, color=ACCENT_GOLD, align=PP_ALIGN.CENTER)
-
-box(s2, 4.0, 5.1, 2.2, 0.7, ACCENT_PURPLE)
-txt(s2, "🤖 AI Model", 4.0, 5.2, 2.2, 0.5, size=16, bold=True, color=TEXT_WHITE, align=PP_ALIGN.CENTER)
-
-txt(s2, "→", 6.3, 5.2, 0.6, 0.5, size=24, bold=True, color=ACCENT_GOLD, align=PP_ALIGN.CENTER)
-
-box(s2, 7.0, 5.1, 2.2, 0.7, ACCENT_PURPLE)
-txt(s2, "🃏 Card ID", 7.0, 5.2, 2.2, 0.5, size=16, bold=True, color=TEXT_WHITE, align=PP_ALIGN.CENTER)
-
-txt(s2, "→", 9.3, 5.2, 0.6, 0.5, size=24, bold=True, color=ACCENT_GOLD, align=PP_ALIGN.CENTER)
-
-box(s2, 10.0, 5.1, 2.5, 0.7, ACCENT_GOLD)
-txt(s2, "🔮 Fortune", 10.0, 5.2, 2.5, 0.5, size=16, bold=True, color=BG_DARK, align=PP_ALIGN.CENTER)
+steps = [("📷  Photo", TEAL), ("🤖  AI Model", TEAL), ("🃏  Card ID", TEAL), ("🔮  Fortune", GOLD)]
+xs = [0.8, 3.9, 7.0, 10.1]
+for i, ((label, color), x) in enumerate(zip(steps, xs)):
+    box(s2, x, 5.1, 2.4, 0.72, color)
+    txt(s2, label, x, 5.22, 2.4, 0.5, size=17, bold=True,
+        color=BG_DARK if color == GOLD else WHITE, align=PP_ALIGN.CENTER)
+    if i < 3:
+        txt(s2, "→", x + 2.4, 5.26, 0.5, 0.45, size=22, bold=True, color=GOLD, align=PP_ALIGN.CENTER)
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -161,36 +156,43 @@ txt(s2, "🔮 Fortune", 10.0, 5.2, 2.5, 0.5, size=16, bold=True, color=BG_DARK, 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 s3 = add_slide()
 bg(s3)
-box(s3, 0, 0, 13.33, 0.12, ACCENT_GOLD)
-box(s3, 0, 7.38, 13.33, 0.12, ACCENT_PURPLE)
+header_bar(s3)
+footer_bar(s3)
 
-section_tag(s3, "PROBLEM & SOLUTION", 0.5, 0.25)
-txt(s3, "Challenge & Approach", 0.5, 0.7, 10, 0.7,
-    size=32, bold=True, color=ACCENT_GOLD)
-divider(s3, 1.5)
+section_tag(s3, "PROBLEM & SOLUTION")
+txt(s3, "Challenge & Approach", 0.5, 0.65, 12.0, 0.75,
+    size=34, bold=True, color=WHITE)
+divider(s3, 1.52)
 
-# Problem box
-box(s3, 0.5, 1.7, 5.7, 3.8, BG_CARD)
-box(s3, 0.5, 1.7, 0.08, 3.8, RGBColor(0xE7, 0x4C, 0x3C))
-txt(s3, "❌  Problem", 0.75, 1.8, 5.2, 0.5, size=18, bold=True, color=RGBColor(0xE7, 0x4C, 0x3C))
-bullet_item(s3, "78 visually distinct tarot cards", 0.65, 2.35, size=15)
-bullet_item(s3, "Complex symbols, figures, colors", 0.65, 2.75, size=15)
-bullet_item(s3, "Small dataset (~30 photos/card)", 0.65, 3.15, size=15)
-bullet_item(s3, "Varied lighting & angles in photos", 0.65, 3.55, size=15)
-bullet_item(s3, "Training from scratch = not enough data", 0.65, 3.95, size=15)
+# Problem
+box(s3, 0.5, 1.7, 5.8, 4.1, BG_CARD)
+box(s3, 0.5, 1.7, 0.06, 4.1, RED)
+txt(s3, "Problem", 0.72, 1.78, 5.3, 0.52, size=20, bold=True, color=RED)
+for i, t in enumerate([
+    "78 visually distinct tarot cards",
+    "Complex symbols, figures, and colors",
+    "Small dataset  (~30 photos per card)",
+    "Varied lighting and shooting angles",
+    "Training from scratch needs huge data",
+]):
+    bullet(s3, t, 0.65, 2.38 + i * 0.52, size=16)
 
-# Solution box
-box(s3, 6.8, 1.7, 5.9, 3.8, BG_CARD)
-box(s3, 6.8, 1.7, 0.08, 3.8, RGBColor(0x2E, 0xCC, 0x71))
-txt(s3, "✅  Solution", 7.05, 1.8, 5.4, 0.5, size=18, bold=True, color=RGBColor(0x2E, 0xCC, 0x71))
-bullet_item(s3, "Transfer learning from ImageNet", 6.95, 2.35, size=15)
-bullet_item(s3, "EfficientNet-B0 as feature extractor", 6.95, 2.75, size=15)
-bullet_item(s3, "Data augmentation (flip, rotate, jitter)", 6.95, 3.15, size=15)
-bullet_item(s3, "2-phase training (freeze → unfreeze)", 6.95, 3.55, size=15)
-bullet_item(s3, "Good accuracy with small dataset", 6.95, 3.95, size=15)
+# Solution
+box(s3, 6.9, 1.7, 5.9, 4.1, BG_CARD)
+box(s3, 6.9, 1.7, 0.06, 4.1, GREEN)
+txt(s3, "Solution", 7.12, 1.78, 5.4, 0.52, size=20, bold=True, color=GREEN)
+for i, t in enumerate([
+    "Transfer learning from ImageNet",
+    "EfficientNet-B0 as feature extractor",
+    "Data augmentation (flip, rotate, jitter)",
+    "2-phase training  (freeze → unfreeze)",
+    "Good accuracy with small dataset",
+]):
+    bullet(s3, t, 7.05, 2.38 + i * 0.52, size=16)
 
-txt(s3, "Key Insight: Borrow knowledge from 1.2M ImageNet images → apply to 78 tarot cards",
-    0.5, 5.9, 12.3, 0.6, size=15, italic=True, color=ACCENT_GOLD, align=PP_ALIGN.CENTER)
+box(s3, 0.5, 6.05, 12.33, 0.55, RGBColor(0x1E, 0x1E, 0x1E))
+txt(s3, "Key Insight:  Borrow knowledge from 1.2M ImageNet images  →  apply to 78 tarot cards",
+    0.6, 6.1, 12.1, 0.45, size=16, italic=True, color=GOLD, align=PP_ALIGN.CENTER)
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -198,65 +200,72 @@ txt(s3, "Key Insight: Borrow knowledge from 1.2M ImageNet images → apply to 78
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 s4 = add_slide()
 bg(s4)
-box(s4, 0, 0, 13.33, 0.12, ACCENT_GOLD)
-box(s4, 0, 7.38, 13.33, 0.12, ACCENT_PURPLE)
+header_bar(s4)
+footer_bar(s4)
 
-section_tag(s4, "ARCHITECTURE", 0.5, 0.25)
-txt(s4, "Model Architecture", 0.5, 0.7, 10, 0.7,
-    size=32, bold=True, color=ACCENT_GOLD)
-divider(s4, 1.5)
+section_tag(s4, "MODEL ARCHITECTURE")
+txt(s4, "Model Architecture", 0.5, 0.65, 12.0, 0.75,
+    size=34, bold=True, color=WHITE)
+divider(s4, 1.52)
 
-# Architecture flow — horizontal blocks
-arch = [
-    ("Input\n224×224×3", ACCENT_PURPLE),
-    ("EfficientNet-B0\nBackbone\n(frozen Phase 1)", RGBColor(0x2C, 0x3E, 0x7A)),
-    ("Global Avg\nPooling\n1280 features", RGBColor(0x2C, 0x3E, 0x7A)),
-    ("Dropout\n+Linear\n→512", RGBColor(0x6C, 0x35, 0x8A)),
-    ("ReLU\n+Dropout", RGBColor(0x6C, 0x35, 0x8A)),
-    ("Linear\n→78\n(Softmax)", ACCENT_GOLD),
+# Architecture blocks
+arch_blocks = [
+    ("Input\n224×224×3",              TEAL),
+    ("EfficientNet-B0\nBackbone",     RGBColor(0x2C, 0x50, 0x6E)),
+    ("Global Avg\nPooling  1280",     RGBColor(0x2C, 0x50, 0x6E)),
+    ("Dropout\nLinear → 512\nReLU",   RGBColor(0x1E, 0x5C, 0x4A)),
+    ("Dropout\nLinear → 78\nSoftmax", GOLD),
 ]
 
-x = 0.4
-for i, (label, color) in enumerate(arch):
-    w = 1.9
-    box(s4, x, 2.0, w, 1.6, color)
-    txt(s4, label, x, 2.1, w, 1.4, size=12, bold=True,
-        color=BG_DARK if color == ACCENT_GOLD else TEXT_WHITE,
+bw = 2.2
+bh = 1.7
+bx = 0.35
+by = 1.9
+for i, (label, color) in enumerate(arch_blocks):
+    box(s4, bx, by, bw, bh, color)
+    txt(s4, label, bx + 0.05, by + 0.35, bw - 0.1, bh - 0.4,
+        size=14, bold=True,
+        color=BG_DARK if color == GOLD else WHITE,
         align=PP_ALIGN.CENTER)
-    if i < len(arch) - 1:
-        txt(s4, "→", x + w, 2.55, 0.4, 0.6, size=20, bold=True,
-            color=ACCENT_GOLD, align=PP_ALIGN.CENTER)
-    x += w + 0.4
+    if i < len(arch_blocks) - 1:
+        txt(s4, "→", bx + bw, by + 0.55, 0.45, 0.6,
+            size=22, bold=True, color=GOLD, align=PP_ALIGN.CENTER)
+    bx += bw + 0.45
 
-# Details table
+# Label below blocks
+labels_below = ["Image Input", "Feature Extraction\n(ImageNet weights)", "Feature Vector", "Custom Head\n(Phase 1 frozen)", "78-Class Output"]
+bx = 0.35
+for label in labels_below:
+    txt(s4, label, bx, by + bh + 0.1, bw, 0.55,
+        size=11, color=MID_GRAY, align=PP_ALIGN.CENTER, italic=True)
+    bx += bw + 0.45
+
+# Properties table
 headers = ["Property", "Value"]
 rows = [
     ["Parameters",    "~5.3M"],
     ["Input Size",    "224 × 224 px"],
-    ["Pretrained On", "ImageNet (1.2M images)"],
-    ["Output",        "78 classes (tarot cards)"],
-    ["Dropout",       "0.3 (both layers)"],
+    ["Pretrained On", "ImageNet  (1.2M images)"],
+    ["Output",        "78 classes  (tarot cards)"],
+    ["Dropout Rate",  "0.3  (applied twice)"],
 ]
 
-col_w = [3.5, 5.0]
-col_x = [0.5, 4.2]
-row_h = 0.38
-ty = 4.1
+col_x = [0.5, 5.0]
+col_w = [4.2, 7.5]
+row_h = 0.4
+ty = 4.35
 
-for ci, h in enumerate(headers):
-    box(s4, col_x[ci], ty, col_w[ci], row_h, ACCENT_PURPLE)
-    txt(s4, h, col_x[ci] + 0.1, ty + 0.04, col_w[ci], row_h,
-        size=13, bold=True, color=TEXT_WHITE)
+box(s4, col_x[0], ty, col_w[0], row_h, TEAL)
+box(s4, col_x[1], ty, col_w[1], row_h, TEAL)
+txt(s4, "Property", col_x[0] + 0.1, ty + 0.07, col_w[0], row_h, size=14, bold=True, color=BG_DARK)
+txt(s4, "Value",    col_x[1] + 0.1, ty + 0.07, col_w[1], row_h, size=14, bold=True, color=BG_DARK)
 
 for ri, row in enumerate(rows):
-    row_color = BG_CARD if ri % 2 == 0 else RGBColor(0x14, 0x14, 0x32)
+    rc = BG_CARD if ri % 2 == 0 else BG_STRIPE
     for ci, cell in enumerate(row):
-        box(s4, col_x[ci], ty + row_h * (ri + 1), col_w[ci], row_h, row_color)
-        txt(s4, cell, col_x[ci] + 0.1, ty + row_h * (ri + 1) + 0.04, col_w[ci], row_h,
-            size=13, color=TEXT_LIGHT if ci == 0 else TEXT_WHITE)
-
-txt(s4, "Why EfficientNet-B0?  Scales depth + width + resolution together → best accuracy per parameter",
-    0.5, 6.9, 12.3, 0.45, size=13, italic=True, color=ACCENT_GOLD)
+        box(s4, col_x[ci], ty + row_h * (ri + 1), col_w[ci], row_h, rc)
+        txt(s4, cell, col_x[ci] + 0.12, ty + row_h * (ri + 1) + 0.07, col_w[ci], row_h,
+            size=14, color=LIGHT_GRAY if ci == 0 else WHITE)
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -264,38 +273,52 @@ txt(s4, "Why EfficientNet-B0?  Scales depth + width + resolution together → be
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 s5 = add_slide()
 bg(s5)
-box(s5, 0, 0, 13.33, 0.12, ACCENT_GOLD)
-box(s5, 0, 7.38, 13.33, 0.12, ACCENT_PURPLE)
+header_bar(s5)
+footer_bar(s5)
 
-section_tag(s5, "TRAINING PIPELINE", 0.5, 0.25)
-txt(s5, "Training Pipeline", 0.5, 0.7, 10, 0.7,
-    size=32, bold=True, color=ACCENT_GOLD)
-divider(s5, 1.5)
+section_tag(s5, "TRAINING PIPELINE")
+txt(s5, "Training Pipeline", 0.5, 0.65, 12.0, 0.75,
+    size=34, bold=True, color=WHITE)
+divider(s5, 1.52)
 
-# Phase boxes side by side
-# Left: Data
-box(s5, 0.5, 1.7, 3.7, 4.5, BG_CARD)
-box(s5, 0.5, 1.7, 0.08, 4.5, ACCENT_GOLD)
-txt(s5, "Data Prep", 0.75, 1.8, 3.3, 0.45, size=15, bold=True, color=ACCENT_GOLD)
-for i, t in enumerate(["78 card classes", "~30 photos / card", "HEIC / JPG / PNG", "Split 75/15/10%"]):
-    bullet_item(s5, t, 0.65, 2.35 + i * 0.45, w=3.5, size=14)
+cols = [
+    ("Data Preparation", GOLD, [
+        "78 card classes (tarot deck)",
+        "~30 photos per card",
+        "HEIC / JPG / PNG formats",
+        "Split:  75% / 15% / 10%",
+        "Stored in Google Drive",
+    ]),
+    ("Phase 1  —  10 Epochs", TEAL, [
+        "Backbone layers frozen",
+        "Train classifier head only",
+        "Learning rate:  1e-3",
+        "Optimizer:  Adam",
+        "Scheduler:  CosineAnnealing",
+    ]),
+    ("Phase 2  —  20 Epochs", GREEN, [
+        "All layers unfrozen",
+        "Fine-tune full network",
+        "Learning rate:  1e-4",
+        "Weight decay:  1e-4",
+        "Best model auto-saved",
+    ]),
+]
 
-# Middle: Phase 1
-box(s5, 4.5, 1.7, 3.8, 4.5, BG_CARD)
-box(s5, 4.5, 1.7, 0.08, 4.5, ACCENT_PURPLE)
-txt(s5, "Phase 1  (10 epochs)", 4.75, 1.8, 3.4, 0.45, size=15, bold=True, color=ACCENT_PURPLE)
-for i, t in enumerate(["Backbone frozen", "Train head only", "LR = 1e-3", "CosineAnnealingLR", "Fast convergence"]):
-    bullet_item(s5, t, 4.65, 2.35 + i * 0.45, w=3.6, size=14)
+cx = 0.5
+for title, color, items in cols:
+    box(s5, cx, 1.7, 4.0, 4.6, BG_CARD)
+    box(s5, cx, 1.7, 0.06, 4.6, color)
+    txt(s5, title, cx + 0.2, 1.78, 3.7, 0.52, size=17, bold=True, color=color)
+    box(s5, cx + 0.2, 2.35, 3.6, 0.04, RGBColor(0x33, 0x33, 0x33))
+    for i, item in enumerate(items):
+        bullet(s5, item, cx + 0.1, 2.48 + i * 0.52, w=3.7, size=15)
+    cx += 4.44
 
-# Right: Phase 2
-box(s5, 8.6, 1.7, 4.2, 4.5, BG_CARD)
-box(s5, 8.6, 1.7, 0.08, 4.5, RGBColor(0x2E, 0xCC, 0x71))
-txt(s5, "Phase 2  (20 epochs)", 8.85, 1.8, 3.8, 0.45, size=15, bold=True, color=RGBColor(0x2E, 0xCC, 0x71))
-for i, t in enumerate(["Backbone unfrozen", "Fine-tune all layers", "LR = 1e-4", "Weight decay 1e-4", "Best model saved"]):
-    bullet_item(s5, t, 8.75, 2.35 + i * 0.45, w=3.9, size=14)
-
-txt(s5, "Augmentation: Resize → RandomCrop → Flip → Rotate ±15° → ColorJitter → Normalize",
-    0.5, 6.5, 12.3, 0.45, size=13, italic=True, color=ACCENT_GOLD)
+# Augmentation note
+box(s5, 0.5, 6.55, 12.33, 0.6, BG_CARD)
+txt(s5, "Augmentation:   Resize  →  RandomCrop  →  Horizontal Flip  →  Rotate ±15°  →  ColorJitter  →  Normalize",
+    0.7, 6.6, 11.9, 0.5, size=15, color=TEAL, align=PP_ALIGN.CENTER)
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -303,34 +326,52 @@ txt(s5, "Augmentation: Resize → RandomCrop → Flip → Rotate ±15° → Colo
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 s6 = add_slide()
 bg(s6)
-box(s6, 0, 0, 13.33, 0.12, ACCENT_GOLD)
-box(s6, 0, 7.38, 13.33, 0.12, ACCENT_PURPLE)
+header_bar(s6)
+footer_bar(s6)
 
-section_tag(s6, "ROADMAP", 0.5, 0.25)
-txt(s6, "Project Roadmap", 0.5, 0.7, 10, 0.7,
-    size=32, bold=True, color=ACCENT_GOLD)
-divider(s6, 1.5)
+section_tag(s6, "ROADMAP")
+txt(s6, "Project Roadmap", 0.5, 0.65, 12.0, 0.75,
+    size=34, bold=True, color=WHITE)
+divider(s6, 1.52)
 
 phases = [
-    ("Phase 1", "Data Collection",    "Photograph all 78 tarot cards\n~30 photos per card, HEIC/JPG",   ACCENT_GOLD,              "🔄 In Progress"),
-    ("Phase 2", "Model Training",     "Fine-tune EfficientNet-B0\nGoogle Colab T4 GPU",                  ACCENT_PURPLE,            "⏳ Upcoming"),
-    ("Phase 3", "Prediction",         "Identify card from photo\nTop-3 confidence scores",               RGBColor(0x2E, 0xCC, 0x71),"⏳ Upcoming"),
-    ("Phase 4", "Fortune Telling",    "Map card → meaning\nGenerate fortune reading",                    RGBColor(0x3B, 0x97, 0xD3),"⏳ Upcoming"),
-    ("Phase 5", "App",                "Build full UI\nPhoto capture + fortune display",                  RGBColor(0xE6, 0x7E, 0x22),"⏳ Upcoming"),
+    ("Phase 1", "Data Collection",
+     "Photograph all 78 tarot cards  ·  ~30 photos each  ·  HEIC / JPG",
+     GOLD, "In Progress"),
+    ("Phase 2", "Model Training",
+     "Fine-tune EfficientNet-B0 on Google Colab T4 GPU",
+     TEAL, "Upcoming"),
+    ("Phase 3", "Card Prediction",
+     "Identify card from photo  ·  Return top-3 confidence scores",
+     RGBColor(0x3B, 0x97, 0xD3), "Upcoming"),
+    ("Phase 4", "Fortune Telling",
+     "Map predicted card → meaning  ·  Generate fortune reading",
+     GREEN, "Upcoming"),
+    ("Phase 5", "Application",
+     "Build full UI  ·  Camera capture  +  fortune display",
+     RGBColor(0xE6, 0x7E, 0x22), "Upcoming"),
 ]
 
 for i, (phase, title, desc, color, status) in enumerate(phases):
-    y = 1.75 + i * 1.0
-    box(s6, 0.5, y, 1.5, 0.75, color)
-    txt(s6, phase, 0.5, y + 0.15, 1.5, 0.45, size=13, bold=True,
-        color=BG_DARK if color == ACCENT_GOLD else TEXT_WHITE, align=PP_ALIGN.CENTER)
+    y = 1.72 + i * 0.98
 
-    box(s6, 2.2, y, 10.6, 0.75, BG_CARD)
-    txt(s6, title, 2.4, y + 0.02, 4.0, 0.38, size=15, bold=True, color=color)
-    txt(s6, desc, 2.4, y + 0.38, 7.0, 0.35, size=12, color=TEXT_LIGHT)
-    txt(s6, status, 10.0, y + 0.2, 2.6, 0.35, size=13, bold=True,
-        color=ACCENT_GOLD if "Progress" in status else TEXT_LIGHT,
-        align=PP_ALIGN.RIGHT)
+    # Phase badge
+    box(s6, 0.5, y, 1.6, 0.75, color)
+    txt(s6, phase, 0.5, y + 0.18, 1.6, 0.42, size=14, bold=True,
+        color=BG_DARK if color == GOLD else WHITE, align=PP_ALIGN.CENTER)
+
+    # Content row
+    box(s6, 2.3, y, 10.5, 0.75, BG_CARD)
+    txt(s6, title, 2.5, y + 0.04, 6.5, 0.38, size=17, bold=True, color=color)
+    txt(s6, desc,  2.5, y + 0.42, 8.0, 0.35, size=13, color=LIGHT_GRAY)
+
+    # Status badge
+    status_color = GOLD if status == "In Progress" else MID_GRAY
+    status_bg    = RGBColor(0x2A, 0x24, 0x10) if status == "In Progress" else BG_STRIPE
+    box(s6, 10.5, y + 0.18, 2.1, 0.38, status_bg)
+    txt(s6, ("🔄 " if status == "In Progress" else "⏳ ") + status,
+        10.5, y + 0.2, 2.1, 0.35, size=13, bold=True,
+        color=status_color, align=PP_ALIGN.CENTER)
 
 
 out = "c:/Users/WannakornSangthongng/Desktop/Fortune Teller/Fortune_Teller_Presentation.pptx"
