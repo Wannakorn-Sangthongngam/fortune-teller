@@ -69,6 +69,13 @@ def bullet(slide, text, l, t, w=11, size=17, color=LIGHT_GRAY):
     txt(slide, "▸   " + text, l, t, w, 0.42, size=size, color=color)
 
 
+def add_notes(slide, notes_text):
+    """Add speaker notes to a slide."""
+    notes_slide = slide.notes_slide
+    tf = notes_slide.notes_text_frame
+    tf.text = notes_text
+
+
 def header_bar(slide):
     box(slide, 0, 0, 13.33, 0.1, GOLD)
 
@@ -107,6 +114,15 @@ txt(s1, "EfficientNet-B0   ·   PyTorch   ·   Transfer Learning", 3.0, 4.25, 7.
 
 txt(s1, "Wannakorn Sangthongngam   ·   2026", 3.0, 4.85, 7.6, 0.45,
     size=14, color=MID_GRAY, align=PP_ALIGN.CENTER)
+
+add_notes(s1,
+"""Hello everyone. My name is Wannakorn Sangthongngam.
+
+Today I am presenting Fortune Teller — an AI-powered system that can recognize tarot cards from photos and generate fortune readings.
+
+The project uses EfficientNet-B0, a state-of-the-art image classification model built with PyTorch, trained using transfer learning from ImageNet.
+
+Let me walk you through the project from motivation to roadmap.""")
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -149,6 +165,17 @@ for i, ((label, color), x) in enumerate(zip(steps, xs)):
         color=BG_DARK if color == GOLD else WHITE, align=PP_ALIGN.CENTER)
     if i < 3:
         txt(s2, "→", x + 2.4, 5.26, 0.5, 0.45, size=22, bold=True, color=GOLD, align=PP_ALIGN.CENTER)
+
+add_notes(s2,
+"""Fortune Teller is a system that combines computer vision and tarot card knowledge.
+
+The idea is simple — the user takes a photo of a tarot card, the AI model identifies which card it is, and then the system displays the fortune meaning associated with that card.
+
+There are 78 cards in a standard tarot deck, each with its own meaning and symbolism.
+
+On the technology side, we use PyTorch as the deep learning framework, EfficientNet-B0 as the model backbone, and Google Colab for training on a free GPU.
+
+The bottom of this slide shows the full pipeline: Photo → AI Model → Card Identification → Fortune Reading.""")
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -193,6 +220,17 @@ for i, t in enumerate([
 box(s3, 0.5, 6.05, 12.33, 0.55, RGBColor(0x1E, 0x1E, 0x1E))
 txt(s3, "Key Insight:  Borrow knowledge from 1.2M ImageNet images  →  apply to 78 tarot cards",
     0.6, 6.1, 12.1, 0.45, size=16, italic=True, color=GOLD, align=PP_ALIGN.CENTER)
+
+add_notes(s3,
+"""The main challenge of this project is that tarot cards are visually complex — each of the 78 cards has unique symbols, figures, and color patterns that the model must learn to distinguish.
+
+The biggest constraint is our small dataset. We only have around 30 photos per card, which is far too little to train a neural network from scratch.
+
+Our solution is transfer learning. Instead of starting from random weights, we use EfficientNet-B0 which was already trained on 1.2 million images from ImageNet. The model already knows how to detect edges, shapes, textures, and patterns.
+
+We then apply data augmentation — randomly flipping, rotating, and adjusting colors — to artificially create more variety from our small set of photos.
+
+Finally, we use a 2-phase training strategy: first train only the classification head while the backbone is frozen, then unfreeze everything for fine-tuning.""")
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -267,6 +305,19 @@ for ri, row in enumerate(rows):
         txt(s4, cell, col_x[ci] + 0.12, ty + row_h * (ri + 1) + 0.07, col_w[ci], row_h,
             size=14, color=LIGHT_GRAY if ci == 0 else WHITE)
 
+add_notes(s4,
+"""This slide shows the full architecture of our model.
+
+Starting from the left — the input is an image resized to 224 by 224 pixels with 3 color channels.
+
+It then passes through the EfficientNet-B0 backbone, which was pretrained on ImageNet. This backbone acts as a powerful feature extractor — it outputs a 1280-dimensional feature vector summarizing what it sees in the image.
+
+We then add our custom classification head on top: a Dropout layer to prevent overfitting, a Linear layer reducing 1280 to 512 dimensions, a ReLU activation, another Dropout, and finally a Linear layer outputting 78 scores — one for each tarot card.
+
+The card with the highest score is the prediction.
+
+Why EfficientNet-B0? It scales depth, width, and resolution together, giving the best accuracy per number of parameters. It has only 5.3 million parameters, making it fast enough to run on a laptop CPU.""")
+
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # SLIDE 5 — Training Pipeline
@@ -319,6 +370,17 @@ for title, color, items in cols:
 box(s5, 0.5, 6.55, 12.33, 0.6, BG_CARD)
 txt(s5, "Augmentation:   Resize  →  RandomCrop  →  Horizontal Flip  →  Rotate ±15°  →  ColorJitter  →  Normalize",
     0.7, 6.6, 11.9, 0.5, size=15, color=TEAL, align=PP_ALIGN.CENTER)
+
+add_notes(s5,
+"""Our training pipeline has three stages.
+
+First, data preparation. We collect around 30 photos per card for all 78 cards. The photos are taken on an iPhone in HEIC format and organized into folders — one folder per card. The dataset is then split into 75% training, 15% validation, and 10% test.
+
+Second, Phase 1 training. We freeze the EfficientNet backbone so its pretrained ImageNet weights are not changed. Only our custom classification head is trained. We use the Adam optimizer with a learning rate of 1e-3 for 10 epochs. This phase converges quickly because the backbone already extracts good features.
+
+Third, Phase 2 fine-tuning. We unfreeze all layers and train the entire network at a lower learning rate of 1e-4 for 20 more epochs. This allows the backbone to slightly adjust to tarot card features. The best model based on validation accuracy is saved automatically.
+
+The augmentation pipeline shown at the bottom helps the model generalize by seeing different versions of each photo during training.""")
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -373,6 +435,23 @@ for i, (phase, title, desc, color, status) in enumerate(phases):
         10.5, y + 0.2, 2.1, 0.35, size=13, bold=True,
         color=status_color, align=PP_ALIGN.CENTER)
 
+
+add_notes(s6,
+"""This roadmap outlines the five phases of the project.
+
+Phase 1 is currently in progress — we are photographing all 78 tarot cards, around 30 shots each, using an iPhone.
+
+Phase 2 will be model training on Google Colab using a free T4 GPU. We expect this to take around 30 to 60 minutes once the photos are ready.
+
+Phase 3 is the prediction module — given a new photo, the model returns the top 3 most likely cards with confidence scores.
+
+Phase 4 adds the fortune telling logic — mapping the predicted card to its traditional meaning and generating a reading for the user.
+
+Phase 5 is the final application — a user interface where someone can take a photo and receive their fortune in real time.
+
+Each phase builds directly on the previous one. The foundation we are building now — a clean dataset and a well-trained model — is what makes everything else possible.
+
+Thank you for listening. I am happy to answer any questions.""")
 
 out = "c:/Users/WannakornSangthongng/Desktop/Fortune Teller/Fortune_Teller_Presentation.pptx"
 prs.save(out)
